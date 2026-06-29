@@ -18,6 +18,7 @@
     "backfill": "tsx workers/backfill.ts",
     "ingest": "tsx workers/rss-ingestion.ts",
     "process": "tsx workers/article-processing.ts",
+    "backfill:content": "python3 workers/backfill_content.py",
     "cluster": "tsx workers/clustering.ts",
     "trends": "tsx workers/trend-analysis.ts",
     "astro": "astro",
