@@ -4,7 +4,7 @@ name: Refresh News
 # to main, which triggers Render to auto-rebuild and redeploy.
 
 on:
-  # Every 2 hours (UTC: 00:00, 02:00, 04:00, ..., 22:00). Commwire is a
+  # Every 2 hours (UTC: 00:00, 02:00, 04:00, ..., 22:00). WorldWire is a
   # public repo so GitHub Actions minutes are free; ~12 min per run × 12 runs
   # per day = 4320 min/month, well within the public-repo allowance.
   schedule:
