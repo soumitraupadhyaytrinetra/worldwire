@@ -1,0 +1,45 @@
+---
+export interface Source {
+  name: string;
+  url: string;
+}
+
+export interface Props {
+  title: string;
+  summary: string;
+  sources: Source[];
+  category: string;
+  articleCount: number;
+  topArticleUrl?: string;
+}
+
+const { title, summary, sources, category, articleCount, topArticleUrl } = Astro.props;
+---
+
+<div class="news-card p-6">
+  <div class="flex items-center gap-2 mb-3 flex-wrap">
+    <span class="category-tag">{category}</span>
+    <span class="cluster-badge">{articleCount} sources</span>
+  </div>
+
+  {topArticleUrl ? (
+    <a href={topArticleUrl}>
+      <h3 class="text-lg font-semibold mb-2 hover:text-[var(--accent)] transition-colors">{title}</h3>
+    </a>
+  ) : (
+    <h3 class="text-lg font-semibold mb-2">{title}</h3>
+  )}
+
+  <p class="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">{summary}</p>
+
+  <div class="flex flex-wrap gap-2">
+    {sources.map((source) => (
+      <a
+        href={source.url}
+        class="text-xs px-3 py-1 rounded-full border border-[var(--border)] text-[var(--text-tertiary)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-colors"
+      >
+        {source.name}
+      </a>
+    ))}
+  </div>
+</div>

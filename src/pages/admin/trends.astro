@@ -1,0 +1,35 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getTrendTopics } from "../../lib/data";
+
+const trends = getTrendTopics();
+const byCategory: Record<string, typeof trends> = {};
+
+for (const t of trends) {
+  if (!byCategory[t.category]) byCategory[t.category] = [];
+  byCategory[t.category].push(t);
+}
+---
+
+<AdminLayout title="Trends">
+  <h1 class="text-2xl font-bold mb-6">Trend Analysis</h1>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {Object.entries(byCategory).map(([category, items]) => (
+      <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-5">
+        <h3 class="font-bold mb-3 capitalize">{category}</h3>
+        <div class="space-y-2">
+          {items.map((t) => (
+            <div class="flex items-center justify-between text-sm py-1.5">
+              <span>{t.topic}</span>
+              <div class="flex items-center gap-3">
+                <span class="text-[var(--text-tertiary)]">{t.mentionCount}</span>
+                <span class="text-xs font-medium text-[var(--green)]">+{t.growthRate}%</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</AdminLayout>

@@ -1,0 +1,36 @@
+---
+import { siteConfig, navigation } from "../../config";
+
+const pathname = Astro.url.pathname;
+
+function isActive(url: string) {
+  if (url === "/") return pathname === "/";
+  return pathname.startsWith(url);
+}
+---
+
+<header class="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg-primary)]/85 backdrop-blur">
+  <div class="app-layout flex h-16 items-center justify-between">
+    <a href="/" class="flex items-center gap-2">
+      <span class="text-xl font-bold gradient-text">{siteConfig.name}</span>
+    </a>
+
+    <nav class="hide-mobile flex items-center gap-6">
+      {navigation.map((item) => (
+        <a
+          href={item.url}
+          class="nav-link"
+          aria-current={isActive(item.url) ? "page" : undefined}
+        >
+          {item.title}
+        </a>
+      ))}
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <a href="/search" class="text-xs font-semibold tracking-wide uppercase px-4 py-1.5 rounded-full border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-colors">
+        Search
+      </a>
+    </div>
+  </div>
+</header>

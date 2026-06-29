@@ -1,0 +1,50 @@
+---
+import { timeAgo } from "../../lib/utils";
+
+export interface Props {
+  id: number;
+  title: string;
+  url: string;
+  source: string;
+  author: string;
+  excerpt: string;
+  category: string;
+  publicationDate: Date;
+  importanceScore: number;
+  imageUrl?: string | null;
+  clusterSize?: number;
+}
+
+const { id, title, url, source, author, excerpt, category, publicationDate, importanceScore, imageUrl, clusterSize } = Astro.props;
+
+const importanceClass = importanceScore >= 70 ? "importance-high" : importanceScore >= 40 ? "importance-medium" : "importance-low";
+---
+
+<article class="news-card overflow-hidden">
+  <a href={`/story/${id}`} class="block p-5">
+    <div class="flex items-start gap-4">
+      {imageUrl && (
+        <div class="w-20 h-20 shrink-0 rounded-lg overflow-hidden max-sm:hidden bg-[var(--bg-secondary)]">
+          <img src={imageUrl} alt="" class="w-full h-full object-cover" loading="lazy" />
+        </div>
+      )}
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-2 flex-wrap">
+          <span class="category-tag">{category}</span>
+          {clusterSize && clusterSize > 1 && (
+            <span class="cluster-badge">{clusterSize} sources</span>
+          )}
+        </div>
+        <h3 class="text-base font-semibold leading-snug mb-1.5 line-clamp-2 group-hover:text-[var(--accent)] transition-colors">
+          {title}
+        </h3>
+        <p class="text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-2 mb-2">{excerpt}</p>
+        <div class="flex items-center gap-2 text-xs text-[var(--text-tertiary)]">
+          <span class="font-medium">{source}</span>
+          <span class="importance-dot {importanceClass}" title={`Score: ${importanceScore}`}></span>
+          <span>{timeAgo(new Date(publicationDate))}</span>
+        </div>
+      </div>
+    </div>
+  </a>
+</article>

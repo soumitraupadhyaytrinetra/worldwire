@@ -1,0 +1,73 @@
+name: Refresh News
+
+# Pulls fresh articles from all RSS sources, commits data/articles.json back
+# to main, which triggers Render to auto-rebuild and redeploy.
+
+on:
+  # Every 2 hours (UTC: 00:00, 02:00, 04:00, ..., 22:00). Commwire is a
+  # public repo so GitHub Actions minutes are free; ~12 min per run × 12 runs
+  # per day = 4320 min/month, well within the public-repo allowance.
+  schedule:
+    - cron: "0 */2 * * *"
+  # Manual trigger from the Actions tab.
+  workflow_dispatch:
+  # Auto-run when source config changes are pushed.
+  push:
+    branches: [main]
+    paths:
+      - "src/lib/rss/sources.ts"
+      - "src/lib/ai/classify.ts"
+      - "workers/rss-ingestion.ts"
+
+# Don't run two refreshes at the same time.
+concurrency:
+  group: refresh-news
+  cancel-in-progress: false
+
+# Needed for the bot to commit and push data/ back to main.
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so the bot can push without shallow-clone errors.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Pull fresh articles from all RSS feeds
+        run: npm run ingest
+
+      - name: Build site (sanity check — fails the run if data is corrupt)
+        run: npm run build
+
+      - name: Detect data changes
+        id: check
+        run: |
+          git add data/
+          if git diff --staged --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No new articles - skipping commit."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "New articles staged."
+          fi
+
+      - name: Commit and push data/
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: :newspaper: refresh news"
+          git push

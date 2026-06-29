@@ -1,0 +1,40 @@
+---
+import { siteConfig } from "../../config";
+---
+
+<footer class="border-t border-[var(--border)] mt-16">
+  <div class="app-layout py-12">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div class="col-span-2 md:col-span-1">
+        <div class="text-lg font-bold gradient-text mb-3">{siteConfig.name}</div>
+        <p class="text-sm text-[var(--text-tertiary)] leading-relaxed">{siteConfig.description}</p>
+      </div>
+      <div>
+        <h4 class="text-xs font-semibold tracking-wide uppercase text-[var(--text-tertiary)] mb-4">News</h4>
+        <ul class="space-y-2">
+          <li><a href="/world" class="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">🌍 World</a></li>
+          <li><a href="/us" class="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">🇺🇸 US & Politics</a></li>
+          <li><a href="/business" class="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">💼 Business</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xs font-semibold tracking-wide uppercase text-[var(--text-tertiary)] mb-4">Tech & Science</h4>
+        <ul class="space-y-2">
+          <li><a href="/tech" class="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">💻 Tech</a></li>
+          <li><a href="/science" class="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">🧬 Science & Health</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xs font-semibold tracking-wide uppercase text-[var(--text-tertiary)] mb-4">More</h4>
+        <ul class="space-y-2">
+          <li><a href="/sports" class="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">⚽ Sports</a></li>
+          <li><a href="/culture" class="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">🎭 Culture</a></li>
+          <li><a href="/trending" class="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">Trending</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-[var(--border)] mt-10 pt-8 text-center text-xs text-[var(--text-tertiary)]">
+      &copy; {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
+    </div>
+  </div>
+</footer>

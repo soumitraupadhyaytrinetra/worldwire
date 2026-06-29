@@ -1,0 +1,27 @@
+---
+export interface Props {
+  placeholder?: string;
+  initialQuery?: string;
+}
+
+const { placeholder = "Search articles, topics, sources...", initialQuery = "" } = Astro.props;
+---
+
+<div class="search-bar flex items-center px-4 py-3 max-w-2xl mx-auto">
+  <svg class="w-4 h-4 text-[var(--text-tertiary)] mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+  </svg>
+  <form action="/search" method="GET" class="flex-1 flex">
+    <input
+      type="text"
+      name="q"
+      value={initialQuery}
+      placeholder={placeholder}
+      class="w-full bg-transparent border-none outline-none text-sm text-[var(--text-primary)]"
+      autocomplete="off"
+    />
+    <button type="submit" class="text-xs font-semibold tracking-wide uppercase px-4 py-1.5 rounded-full bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors ml-2">
+      Search
+    </button>
+  </form>
+</div>

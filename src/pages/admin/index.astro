@@ -1,0 +1,59 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getAllArticles, getSources, getTrendTopics } from "../../lib/data";
+
+const articles = getAllArticles();
+const sources = getSources();
+const trends = getTrendTopics();
+const processed = articles.filter((a) => a.processed).length;
+const categories = [...new Set(articles.map((a) => a.category))];
+---
+
+<AdminLayout title="Dashboard">
+  <h1 class="text-2xl font-bold mb-6">Dashboard</h1>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-5">
+      <div class="text-2xl font-bold">{articles.length}</div>
+      <div class="text-sm text-[var(--text-tertiary)]">Total Articles</div>
+    </div>
+    <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-5">
+      <div class="text-2xl font-bold">{sources.length}</div>
+      <div class="text-sm text-[var(--text-tertiary)]">Active Sources</div>
+    </div>
+    <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-5">
+      <div class="text-2xl font-bold">{categories.length}</div>
+      <div class="text-sm text-[var(--text-tertiary)]">Categories</div>
+    </div>
+    <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-5">
+      <div class="text-2xl font-bold">{processed}</div>
+      <div class="text-sm text-[var(--text-tertiary)]">AI Processed</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-5">
+      <h3 class="font-bold mb-3">Sources</h3>
+      <div class="space-y-2">
+        {sources.map((s) => (
+          <div class="flex items-center justify-between text-sm py-1.5 border-b border-[var(--border)] last:border-0">
+            <span>{s.name}</span>
+            <span class="text-[var(--text-tertiary)]">{s.articleCount} articles</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-5">
+      <h3 class="font-bold mb-3">Trending Topics</h3>
+      <div class="space-y-2">
+        {trends.slice(0, 15).map((t) => (
+          <div class="flex items-center justify-between text-sm py-1.5 border-b border-[var(--border)] last:border-0">
+            <span>{t.topic}</span>
+            <span class="text-[var(--text-tertiary)]">{t.mentionCount} mentions</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</AdminLayout>

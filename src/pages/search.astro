@@ -1,0 +1,163 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SearchBar from "../components/search/SearchBar.astro";
+import { getAllArticles } from "../lib/data";
+
+// Astro static output strips the query string from Astro.url / Astro.request.url
+// before render — even in dev. So search has to read ?q= client-side from
+// window.location and filter a pre-rendered JSON endpoint at /api/articles.json.
+const totalArticles = getAllArticles().length;
+---
+
+<BaseLayout title="Search">
+  <div class="mb-8 max-w-xl mx-auto text-center">
+    <h1 class="text-sm font-semibold tracking-wide uppercase text-[var(--text-tertiary)] mb-4">Search</h1>
+    <SearchBar initialQuery="" />
+  </div>
+
+  <div
+    id="search-meta"
+    class="mb-6 max-w-xl mx-auto text-sm text-[var(--text-secondary)] hidden"
+  >
+    <span id="search-count">0</span> results for "<strong id="search-q" class="text-[var(--text-primary)]"></strong>"
+  </div>
+
+  <div id="search-empty" class="text-center py-16">
+    <p class="text-sm text-[var(--text-tertiary)]">Search across {totalArticles} articles</p>
+  </div>
+
+  <div id="search-noresults" class="text-center py-16 hidden">
+    <p class="text-sm text-[var(--text-tertiary)]">No results for "<span id="search-noresults-q"></span>"</p>
+  </div>
+
+  <div id="search-results" class="space-y-3 max-w-xl mx-auto"></div>
+
+  <script is:inline>
+    (function () {
+      function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+          return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+        });
+      }
+
+      function timeAgo(iso) {
+        var d = new Date(iso);
+        var diff = (Date.now() - d.getTime()) / 1000;
+        if (diff < 60) return "just now";
+        if (diff < 3600) return Math.floor(diff / 60) + "m ago";
+        if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
+        if (diff < 604800) return Math.floor(diff / 86400) + "d ago";
+        return d.toLocaleDateString();
+      }
+
+      function importanceClass(score) {
+        if (score >= 70) return "importance-high";
+        if (score >= 40) return "importance-medium";
+        return "importance-low";
+      }
+
+      function renderResults(articles, q) {
+        var meta = document.getElementById("search-meta");
+        var count = document.getElementById("search-count");
+        var sq = document.getElementById("search-q");
+        var empty = document.getElementById("search-empty");
+        var noRes = document.getElementById("search-noresults");
+        var noResQ = document.getElementById("search-noresults-q");
+        var results = document.getElementById("search-results");
+
+        count.textContent = articles.length;
+        sq.textContent = q;
+        results.innerHTML = "";
+
+        if (articles.length === 0) {
+          meta.classList.add("hidden");
+          noRes.classList.remove("hidden");
+          noResQ.textContent = q;
+          return;
+        }
+
+        empty.classList.add("hidden");
+        noRes.classList.add("hidden");
+        meta.classList.remove("hidden");
+
+        var html = "";
+        for (var i = 0; i < articles.length; i++) {
+          var a = articles[i];
+          var img = a.imageUrl
+            ? '<div class="w-20 h-20 shrink-0 rounded-lg overflow-hidden max-sm:hidden bg-[var(--bg-secondary)]"><img src="' +
+              escapeHtml(a.imageUrl) +
+              '" alt="" class="w-full h-full object-cover" loading="lazy" /></div>'
+            : "";
+          html +=
+            '<article class="news-card overflow-hidden"><a href="/story/' +
+            a.id +
+            '" class="block p-5"><div class="flex items-start gap-4">' +
+            img +
+            '<div class="flex-1 min-w-0"><div class="flex items-center gap-2 mb-2 flex-wrap"><span class="category-tag">' +
+            escapeHtml(a.category) +
+            '</span></div><h3 class="text-base font-semibold leading-snug mb-1.5 line-clamp-2">' +
+            escapeHtml(a.title) +
+            '</h3><p class="text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-2 mb-2">' +
+            escapeHtml(a.excerpt) +
+            '</p><div class="flex items-center gap-2 text-xs text-[var(--text-tertiary)]"><span class="font-medium">' +
+            escapeHtml(a.source) +
+            '</span><span class="importance-dot ' +
+            importanceClass(a.importanceScore) +
+            '" title="Score: ' +
+            a.importanceScore +
+            '"></span><span>' +
+            timeAgo(a.publicationDate) +
+            "</span></div></div></div></a></article>";
+        }
+        results.innerHTML = html;
+      }
+
+      function runSearch(articles) {
+        var q = (new URLSearchParams(window.location.search).get("q") || "").trim();
+        // Pre-fill the search input with the current query
+        var input = document.querySelector('input[name="q"]');
+        if (input && q) input.value = q;
+
+        if (!q) {
+          document.getElementById("search-empty").classList.remove("hidden");
+          return;
+        }
+        var ql = q.toLowerCase();
+        var hits = articles.filter(function (a) {
+          return (
+            (a.title || "").toLowerCase().includes(ql) ||
+            (a.excerpt || "").toLowerCase().includes(ql) ||
+            (a.source || "").toLowerCase().includes(ql) ||
+            (a.author || "").toLowerCase().includes(ql) ||
+            (a.category || "").toLowerCase().includes(ql)
+          );
+        });
+        hits.sort(function (x, y) {
+          return (y.importanceScore || 0) - (x.importanceScore || 0);
+        });
+        renderResults(hits, q);
+      }
+
+      // Update the search-bar input value as soon as the page paints, then
+      // fetch the slim article index and run the search.
+      var initialQ = new URLSearchParams(window.location.search).get("q") || "";
+      var preInput = document.querySelector('input[name="q"]');
+      if (preInput && initialQ) preInput.value = initialQ;
+
+      fetch("/api/articles.json")
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          runSearch(data);
+        })
+        .catch(function (err) {
+          console.error("Search fetch failed:", err);
+          var empty = document.getElementById("search-empty");
+          if (empty) {
+            empty.textContent = "Search is temporarily unavailable.";
+          }
+        });
+    })();
+  </script>
+</BaseLayout>

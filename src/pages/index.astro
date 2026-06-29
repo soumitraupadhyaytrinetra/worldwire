@@ -1,0 +1,116 @@
+---
+import { siteConfig } from "../config";
+import HeroSection from "../components/news/HeroSection.astro";
+import NewsCard from "../components/news/NewsCard.astro";
+import TrendingTopics from "../components/news/TrendingTopics.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { categories } from "../config";
+import { getTopStories, getTrendingArticles, getArticlesByCategory, getTrendTopics, getCategoryCount } from "../lib/data";
+
+const topStories = getTopStories(15);
+const trending = getTrendingArticles(4);
+
+const worldArticles = getArticlesByCategory("world", 6);
+const usArticles = getArticlesByCategory("us", 6);
+const businessArticles = getArticlesByCategory("business", 6);
+const techArticles = getArticlesByCategory("tech", 4);
+const scienceArticles = getArticlesByCategory("science", 4);
+const sportsArticles = getArticlesByCategory("sports", 4);
+const cultureArticles = getArticlesByCategory("culture", 4);
+
+const trendTopics = getTrendTopics();
+---
+
+<BaseLayout title="Home">
+  <HeroSection articles={trending.slice(0, 4).map(a => ({
+    id: a.id,
+    title: a.title,
+    excerpt: a.excerpt,
+    source: a.source,
+    category: a.category,
+    publicationDate: new Date(a.publicationDate),
+    importanceScore: a.importanceScore,
+    imageUrl: a.imageUrl,
+  }))} />
+
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
+    <div>
+      <section class="mb-10">
+        <h2 class="text-sm font-semibold tracking-wide uppercase text-[var(--text-tertiary)] mb-5">Top Stories</h2>
+        <div class="space-y-3">
+          {topStories.slice(0, 8).map((article) => (
+            <NewsCard
+              id={article.id}
+              title={article.title}
+              url={article.url}
+              source={article.source}
+              author={article.author}
+              excerpt={article.excerpt}
+              category={article.category}
+              publicationDate={new Date(article.publicationDate)}
+              importanceScore={article.importanceScore}
+              imageUrl={article.imageUrl}
+            />
+          ))}
+        </div>
+      </section>
+
+      {worldArticles.length > 0 && (
+        <section class="mb-10">
+          <div class="flex items-center justify-between mb-5">
+            <h2 class="text-sm font-semibold tracking-wide uppercase text-[var(--text-tertiary)] mb-0">🌍 World</h2>
+            <a href="/world" class="text-xs font-medium text-[var(--accent)] hover:underline">View all &rarr;</a>
+          </div>
+          <div class="space-y-3">
+            {worldArticles.slice(0, 4).map((article) => (
+              <NewsCard {...article} publicationDate={new Date(article.publicationDate)} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {usArticles.length > 0 && (
+        <section class="mb-10">
+          <div class="flex items-center justify-between mb-5">
+            <h2 class="text-sm font-semibold tracking-wide uppercase text-[var(--text-tertiary)] mb-0">🇺🇸 US & Politics</h2>
+            <a href="/us" class="text-xs font-medium text-[var(--accent)] hover:underline">View all &rarr;</a>
+          </div>
+          <div class="space-y-3">
+            {usArticles.slice(0, 4).map((article) => (
+              <NewsCard {...article} publicationDate={new Date(article.publicationDate)} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {businessArticles.length > 0 && (
+        <section class="mb-10">
+          <div class="flex items-center justify-between mb-5">
+            <h2 class="text-sm font-semibold tracking-wide uppercase text-[var(--text-tertiary)] mb-0">💼 Business</h2>
+            <a href="/business" class="text-xs font-medium text-[var(--accent)] hover:underline">View all &rarr;</a>
+          </div>
+          <div class="space-y-3">
+            {businessArticles.slice(0, 4).map((article) => (
+              <NewsCard {...article} publicationDate={new Date(article.publicationDate)} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        {categories.filter(c => ["tech", "science", "sports", "culture"].includes(c.id)).map((cat) => (
+          <a href={`/${cat.id}`} class="news-card p-6 text-center block hover:border-[var(--accent)] transition-colors">
+            <h3 class="font-semibold text-base">{cat.icon} {cat.label}</h3>
+            <p class="text-xs text-[var(--text-tertiary)] mt-1">{getCategoryCount(cat.id)} articles</p>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <aside class="max-lg:hidden">
+      <div class="sticky top-24">
+        <TrendingTopics trends={trendTopics.slice(0, 10)} period="trending" />
+      </div>
+    </aside>
+  </div>
+</BaseLayout>

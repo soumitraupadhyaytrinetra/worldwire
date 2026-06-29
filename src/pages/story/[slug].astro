@@ -1,0 +1,131 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import NewsCard from "../../components/news/NewsCard.astro";
+import { getArticleBySlug, getRelatedArticles, getArticlesByCategory } from "../../lib/data";
+import { formatDate } from "../../lib/utils";
+
+export async function getStaticPaths() {
+  const { getAllArticles } = await import("../../lib/data");
+  const articles = getAllArticles();
+  return articles.map((a) => ({
+    params: { slug: String(a.id) },
+    props: { article: a },
+  }));
+}
+
+const { article } = Astro.props;
+const relatedArticles = getRelatedArticles(article.id, 5);
+const sameCategory = getArticlesByCategory(article.category, 5).filter((a) => a.id !== article.id).slice(0, 3);
+---
+
+{!article ? (
+  <BaseLayout title="Not Found">
+    <div class="text-center py-16">
+      <h1 class="text-xl font-semibold mb-2">Article Not Found</h1>
+    </div>
+  </BaseLayout>
+) : (
+<BaseLayout title={article.title} description={article.excerpt}>
+  <article class="max-w-4xl mx-auto">
+    <div class="mb-8">
+      <div class="flex items-center gap-3 mb-4 flex-wrap">
+        <span class="category-tag">{article.category}</span>
+        <span class="text-sm text-[var(--text-tertiary)]">{article.source}</span>
+        <span class="text-sm text-[var(--text-tertiary)]">·</span>
+        <span class="text-sm text-[var(--text-tertiary)]">{formatDate(new Date(article.publicationDate))}</span>
+      </div>
+
+      <h1 class="text-3xl md:text-4xl font-bold leading-tight mb-4 tracking-tight">{article.title}</h1>
+
+      <div class="flex items-center gap-3 text-sm text-[var(--text-secondary)] mb-6">
+        {article.author && article.author !== "Unknown" && (
+          <>
+            <span>{article.author}</span>
+            <span>·</span>
+          </>
+        )}
+        <a href={article.url} target="_blank" rel="noopener" class="text-[var(--accent)] hover:underline font-medium">
+          Read original &rarr;
+        </a>
+      </div>
+
+      {article.imageUrl && (
+        <img src={article.imageUrl} alt="" class="w-full rounded-lg mb-8 max-h-96 object-cover" loading="lazy" />
+      )}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-8 mb-12">
+      <div>
+        <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-6 mb-6">
+          <h3 class="text-xs font-semibold tracking-wide uppercase text-[var(--accent)] mb-2">TL;DR</h3>
+          <p class="text-sm text-[var(--text-secondary)] leading-relaxed">{article.excerpt}</p>
+        </div>
+
+        <div class="text-sm text-[var(--text-secondary)] leading-relaxed space-y-4" set:html={article.content}></div>
+
+        {article.tags.length > 0 && (
+          <div class="flex flex-wrap gap-2 mt-8 pt-6 border-t border-[var(--border)]">
+            {article.tags.map((tag) => (
+              <a href={`/search?q=${encodeURIComponent(tag)}`} class="text-xs px-3 py-1 rounded-full border border-[var(--border)] text-[var(--text-tertiary)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-colors">
+                {tag}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <aside class="space-y-6">
+        {article.importanceScore > 0 && (
+          <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-5">
+            <h4 class="text-xs font-semibold tracking-wide uppercase text-[var(--text-tertiary)] mb-4">Intelligence</h4>
+            <div class="space-y-4">
+              <div>
+                <div class="flex items-center justify-between text-xs mb-1">
+                  <span class="text-[var(--text-tertiary)]">Importance</span>
+                  <span class="font-mono text-[var(--accent)]">{article.importanceScore}/100</span>
+                </div>
+                <div class="h-1 bg-[var(--border)] rounded-full overflow-hidden">
+                  <div class="h-full bg-[var(--accent)] rounded-full" style={"width:" + article.importanceScore + "%"}></div>
+                </div>
+              </div>
+              <div>
+                <span class="text-xs text-[var(--text-tertiary)]">Source</span>
+                <p class="text-sm font-medium mt-0.5">{article.source}</p>
+              </div>
+              <div>
+                <span class="text-xs text-[var(--text-tertiary)]">Category</span>
+                <p class="text-sm font-medium capitalize mt-0.5">{article.category}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {relatedArticles.length > 0 && (
+          <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-5">
+            <h4 class="text-xs font-semibold tracking-wide uppercase text-[var(--text-tertiary)] mb-4">Related</h4>
+            <div class="space-y-3">
+              {relatedArticles.slice(0, 4).map((ra) => (
+                <a href={`/story/${ra.id}`} class="block group">
+                  <div class="text-sm line-clamp-2 group-hover:text-[var(--accent)] transition-colors">{ra.title}</div>
+                  <div class="text-xs text-[var(--text-tertiary)] mt-0.5">{ra.source}</div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+      </aside>
+    </div>
+  </article>
+
+  {sameCategory.length > 0 && (
+    <section class="mt-12 pt-8 border-t border-[var(--border)]">
+      <h2 class="text-sm font-semibold tracking-wide uppercase text-[var(--text-tertiary)] mb-5">More in {article.category}</h2>
+      <div class="space-y-3">
+        {sameCategory.map((a) => (
+          <NewsCard {...a} publicationDate={new Date(a.publicationDate)} />
+        ))}
+      </div>
+    </section>
+  )}
+</BaseLayout>
+)}

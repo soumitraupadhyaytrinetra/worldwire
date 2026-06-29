@@ -1,0 +1,243 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+:root {
+  --base-50: #F5F4ED;
+  --base-100: #ECEAE2;
+  --base-200: #DDDAD1;
+  --base-300: #C7C3B9;
+  --base-400: #A9A499;
+  --base-500: #8A867C;
+  --base-600: #6E6A62;
+  --base-700: #56534D;
+  --base-800: #3F3D39;
+  --base-900: #252523;
+  --base-950: #141413;
+  --brand: #E85D2A;
+}
+
+:root {
+  color-scheme: light;
+  --bg-primary: var(--base-50);
+  --bg-secondary: var(--base-100);
+  --bg-card: var(--base-100);
+  --text-primary: var(--base-900);
+  --text-secondary: var(--base-700);
+  --text-tertiary: var(--base-500);
+  --border: var(--base-300);
+  --accent: var(--brand);
+  --accent-hover: #d04d1a;
+  --accent-light: rgba(232, 93, 42, 0.1);
+  --green: #2f9e44;
+  --red: #c92a2a;
+  --orange: #e67700;
+  --selection: color-mix(in srgb, var(--brand) 15%, transparent);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-primary: var(--base-950);
+  --bg-secondary: var(--base-900);
+  --bg-card: var(--base-900);
+  --text-primary: var(--base-100);
+  --text-secondary: var(--base-200);
+  --text-tertiary: var(--base-500);
+  --border: var(--base-700);
+  --accent: var(--brand);
+  --accent-hover: #f07040;
+  --accent-light: rgba(232, 93, 42, 0.12);
+  --green: #40c057;
+  --red: #fa5252;
+  --orange: #f59f00;
+  --selection: color-mix(in srgb, var(--brand) 12%, transparent);
+}
+
+@theme {
+  --font-sans: "Manrope", system-ui, sans-serif;
+  --font-mono: "Fira Code", monospace;
+  --color-deepwire-50: #fff4ed;
+  --color-deepwire-100: #ffe6d4;
+  --color-deepwire-200: #ffc8a8;
+  --color-deepwire-300: #ffa475;
+  --color-deepwire-400: #ff7840;
+  --color-deepwire-500: #e85d2a;
+  --color-deepwire-600: #d04d1a;
+  --color-deepwire-700: #b03d10;
+  --color-deepwire-800: #8a3312;
+  --color-deepwire-900: #6f2b12;
+}
+
+* {
+  scrollbar-color: var(--border) transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--selection);
+  color: var(--text-primary);
+}
+
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
+p, li {
+  text-wrap: pretty;
+}
+
+.news-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.news-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(232, 93, 42, 0.08);
+}
+
+.cluster-badge {
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.importance-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.importance-high { background: var(--green); }
+.importance-medium { background: var(--orange); }
+.importance-low { background: var(--text-tertiary); }
+
+.category-tag {
+  font-size: 0.65rem;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.category-ai { background: rgba(232, 93, 42, 0.12); color: var(--accent); }
+.category-agents { background: rgba(232, 93, 42, 0.12); color: var(--accent); }
+.category-llms { background: rgba(232, 93, 42, 0.12); color: var(--accent); }
+.category-research { background: rgba(47, 158, 68, 0.12); color: var(--green); }
+.category-startups { background: rgba(230, 119, 0, 0.12); color: var(--orange); }
+.category-security { background: rgba(201, 42, 42, 0.12); color: var(--red); }
+.category-space { background: rgba(47, 100, 200, 0.12); color: #2f64c8; }
+.category-semiconductors { background: rgba(232, 93, 42, 0.12); color: var(--accent); }
+.category-robotics { background: rgba(47, 158, 68, 0.12); color: var(--green); }
+.category-cloud { background: rgba(47, 100, 200, 0.12); color: #2f64c8; }
+.category-quantum { background: rgba(130, 70, 200, 0.12); color: #8246c8; }
+
+.hero-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #f07040);
+}
+
+.hero-section:hover {
+  border-color: var(--accent);
+}
+
+.search-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.search-bar:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.search-bar input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.trending-tag {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 0.825rem;
+  transition: all 0.2s;
+}
+
+.trending-tag:hover {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.nav-link {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.15s;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+}
+
+.nav-link[aria-current="page"] {
+  color: var(--accent);
+}
+
+.admin-sidebar {
+  width: 240px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  min-height: 100vh;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent) 0%, #f07040 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@utility app-layout {
+  @apply max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile { display: none; }
+}

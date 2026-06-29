@@ -1,0 +1,42 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import NewsCard from "../components/news/NewsCard.astro";
+import TrendingTopics from "../components/news/TrendingTopics.astro";
+import { getTopStories, getTrendTopics, getAllArticles } from "../lib/data";
+
+const topArticles = getTopStories(50);
+const trendTopics = getTrendTopics();
+const allArticles = getAllArticles();
+---
+
+<BaseLayout title="Trending">
+  <div class="mb-8">
+    <h1 class="text-xs font-semibold tracking-wide uppercase text-[var(--text-tertiary)] mb-2">Trending</h1>
+    <p class="text-[var(--text-secondary)] text-sm">Most discussed topics across world, US, business, tech, science, sports, and culture ({allArticles.length} articles)</p>
+  </div>
+
+  <div class="flex flex-wrap gap-2 mb-8">
+    {trendTopics.slice(0, 20).map((trend) => (
+      <a
+        href={`/search?q=${encodeURIComponent(trend.topic)}`}
+        class="trending-tag"
+      >
+        {trend.topic}
+        <span class="ml-1.5 text-xs text-[var(--green)]">+{trend.growthRate}%</span>
+      </a>
+    ))}
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
+    <div class="space-y-3">
+      {topArticles.map((article) => (
+        <NewsCard {...article} publicationDate={new Date(article.publicationDate)} />
+      ))}
+    </div>
+    <aside class="max-lg:hidden">
+      <div class="sticky top-24">
+        <TrendingTopics trends={trendTopics.slice(0, 10)} period="trending" />
+      </div>
+    </aside>
+  </div>
+</BaseLayout>

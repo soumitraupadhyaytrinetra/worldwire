@@ -1,0 +1,53 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getAllArticles, getSources } from "../../lib/data";
+import * as fs from "fs";
+import * as path from "path";
+
+const articles = getAllArticles();
+const sources = getSources();
+
+let lastRun = "Unknown";
+try {
+  const statePath = path.join(process.env.DATA_DIR || path.join(process.cwd(), "data"), "sources-state.json");
+  if (fs.existsSync(statePath)) {
+    const state = JSON.parse(fs.readFileSync(statePath, "utf-8"));
+    const dates = Object.values(state) as string[];
+    if (dates.length > 0) {
+      lastRun = new Date(Math.max(...dates.map((d) => new Date(d).getTime()))).toLocaleString();
+    }
+  }
+} catch {}
+---
+
+<AdminLayout title="Jobs">
+  <h1 class="text-2xl font-bold mb-6">Ingestion Jobs</h1>
+
+  <div class="grid grid-cols-2 gap-4 mb-8">
+    <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-5">
+      <div class="text-sm text-[var(--text-tertiary)] mb-1">Last Ingestion</div>
+      <div class="font-medium">{lastRun}</div>
+    </div>
+    <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-5">
+      <div class="text-sm text-[var(--text-tertiary)] mb-1">Articles in DB</div>
+      <div class="font-medium">{articles.length}</div>
+    </div>
+  </div>
+
+  <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-5">
+    <h3 class="font-bold mb-3">Available Commands</h3>
+    <div class="space-y-3 text-sm">
+      {[
+        { cmd: "npm run ingest", desc: "Ingest all RSS feeds" },
+        { cmd: "npm run process", desc: "Run AI enrichment pipeline" },
+        { cmd: "npm run cluster", desc: "Run story clustering" },
+        { cmd: "npm run trends", desc: "Run trend analysis" },
+      ].map((item) => (
+        <div class="flex items-center justify-between py-2 border-b border-[var(--border)] last:border-0">
+          <code class="text-[var(--accent)] font-mono text-xs">{item.cmd}</code>
+          <span class="text-[var(--text-tertiary)]">{item.desc}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</AdminLayout>

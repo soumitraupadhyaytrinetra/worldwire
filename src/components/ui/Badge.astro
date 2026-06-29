@@ -1,0 +1,24 @@
+---
+export interface Props {
+  variant?: "default" | "success" | "warning" | "danger";
+  size?: "sm" | "md";
+}
+
+const { variant = "default", size = "sm" } = Astro.props;
+
+const variants = {
+  default: "bg-[var(--accent-light)] text-[var(--accent)]",
+  success: "bg-[rgba(47,158,68,0.15)] text-[var(--green)]",
+  warning: "bg-[rgba(230,119,0,0.15)] text-[var(--orange)]",
+  danger: "bg-[rgba(224,49,49,0.15)] text-[var(--red)]",
+};
+
+const sizes = {
+  sm: "text-xs px-2 py-0.5",
+  md: "text-sm px-3 py-1",
+};
+---
+
+<span class="inline-flex items-center font-medium rounded-full {variants[variant]} {sizes[size]}">
+  <slot />
+</span>
