@@ -16,6 +16,47 @@ export async function getStaticPaths() {
 const { article } = Astro.props;
 const relatedArticles = getRelatedArticles(article.id, 5);
 const sameCategory = getArticlesByCategory(article.category, 5).filter((a) => a.id !== article.id).slice(0, 3);
+
+// --- Summary / body helpers -----------------------------------------------
+// Some articles (especially from paywalled or otherwise-blocked sources)
+// only have their title duplicated into `excerpt` and `content`. Showing
+// the same string three times in a row is worse than skipping the panel.
+// These helpers detect that case and let the template render nothing (or a
+// "Read original" CTA) instead.
+
+const stripHtml = (html: string) =>
+  (html || "")
+    .replace(/<(script|style)\b[^>]*>.*?<\/\1>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const titleNorm = (article.title || "").trim().toLowerCase();
+const excerptText = stripHtml(article.excerpt || "");
+const contentText = stripHtml(article.content || "");
+
+// A summary is "meaningful" only if it's a real sentence — at least 50
+// chars AND not just the title repeated.
+const summaryText =
+  excerptText.length >= 50 && excerptText.toLowerCase() !== titleNorm
+    ? excerptText
+    : "";
+
+// A body is "meaningful" only if it's at least 200 chars of plain text AND
+// meaningfully longer than (or different from) the title.
+const bodyText =
+  contentText.length >= 200 && contentText.toLowerCase() !== titleNorm
+    ? contentText
+    : "";
+
+// True when the page truly has nothing to show beyond the title + image.
+const isStub = !summaryText && !bodyText;
 ---
 
 {!article ? (
@@ -56,12 +97,32 @@ const sameCategory = getArticlesByCategory(article.category, 5).filter((a) => a.
 
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-8 mb-12">
       <div>
-        <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-6 mb-6">
-          <h3 class="text-xs font-semibold tracking-wide uppercase text-[var(--accent)] mb-2">TL;DR</h3>
-          <p class="text-sm text-[var(--text-secondary)] leading-relaxed">{article.excerpt}</p>
-        </div>
+        {summaryText && (
+          <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-6 mb-6">
+            <h3 class="text-xs font-semibold tracking-wide uppercase text-[var(--accent)] mb-2">TL;DR</h3>
+            <p class="text-sm text-[var(--text-secondary)] leading-relaxed">{summaryText}</p>
+          </div>
+        )}
 
-        <div class="text-sm text-[var(--text-secondary)] leading-relaxed space-y-4" set:html={article.content}></div>
+        {bodyText ? (
+          <div class="text-sm text-[var(--text-secondary)] leading-relaxed space-y-4" set:html={article.content}></div>
+        ) : (
+          <div class="bg-[var(--bg-card)] border border-dashed border-[var(--border)] rounded-lg p-6 text-center">
+            <p class="text-sm text-[var(--text-secondary)] leading-relaxed mb-3">
+              {isStub
+                ? "The full summary for this story isn't available in our archive yet."
+                : "Continue reading on the original site for the full story."}
+            </p>
+            <a
+              href={article.url}
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center gap-1 text-sm font-medium text-[var(--accent)] hover:underline"
+            >
+              Read the full story on {article.source || "the original site"} &rarr;
+            </a>
+          </div>
+        )}
 
         {article.tags.length > 0 && (
           <div class="flex flex-wrap gap-2 mt-8 pt-6 border-t border-[var(--border)]">
