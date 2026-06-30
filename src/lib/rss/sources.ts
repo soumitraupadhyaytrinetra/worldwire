@@ -6,16 +6,22 @@ export interface RSSSource {
   authority: number;
 }
 
-// 26 working feeds (probed 2026-06-29). Failed candidates pruned:
+// 30 working feeds (probed 2026-06-30). Failed candidates pruned:
 // - Reuters World, Reuters US, Reuters Business: reuters.com / reutersagency.com
 //   endpoints return 401/404 (authentication required)
 // - Politico: 403 bot block on all sub-feeds
 // - AP News: 401 / fetch failed (auth or moved)
 // - Wall Street Journal US/business: 403 (paywall / bot block)
-// - WSJ World works (kept)
+//   (WSJ World kept — that endpoint still works.)
 // - NPR Health: 404 (section deprecated); NPR Shots Health + Health Care work
 // - Scientific American: 404 (podcast feed gone; main feed also 404)
 // - USA Today: HTTP 406 (negotiation failure)
+// - Bloomberg Markets: paywalled article pages — crawl4ai always returned
+//   empty content, so every Bloomberg story showed up with no summary.
+//   Replaced 2026-06-30 with MarketWatch, Yahoo Finance, Investing.com,
+//   Business Insider Markets, and OilPrice.com — all scrapeable so each
+//   article gets a real TL;DR + body.
+// - Financial Times: same paywall problem as Bloomberg, removed.
 export const defaultSources: RSSSource[] = [
   // World
   { name: "BBC World", feedUrl: "https://feeds.bbci.co.uk/news/world/rss.xml", url: "https://www.bbc.com/news/world", category: "world", authority: 10 },
@@ -30,8 +36,15 @@ export const defaultSources: RSSSource[] = [
   { name: "CBS News", feedUrl: "https://www.cbsnews.com/latest/rss/main", url: "https://www.cbsnews.com", category: "us", authority: 8 },
 
   // Business
-  { name: "Bloomberg Markets", feedUrl: "https://feeds.bloomberg.com/markets/news.rss", url: "https://www.bloomberg.com/markets", category: "business", authority: 10 },
-  { name: "Financial Times", feedUrl: "https://www.ft.com/rss/home", url: "https://www.ft.com", category: "business", authority: 10 },
+  // Bloomberg + FT removed 2026-06-30 — paywalled article pages meant
+  // crawl4ai couldn't extract content, so every story showed up with an
+  // empty body. Replaced with five scrapeable sources covering US/global
+  // markets and commodities so each article gets a real TL;DR + body.
+  { name: "MarketWatch", feedUrl: "https://feeds.marketwatch.com/marketwatch/topstories/", url: "https://www.marketwatch.com", category: "business", authority: 9 },
+  { name: "Yahoo Finance", feedUrl: "https://finance.yahoo.com/news/rssindex", url: "https://finance.yahoo.com", category: "business", authority: 9 },
+  { name: "Investing.com", feedUrl: "https://www.investing.com/rss/news.rss", url: "https://www.investing.com", category: "business", authority: 8 },
+  { name: "Business Insider Markets", feedUrl: "https://markets.businessinsider.com/rss/news", url: "https://markets.businessinsider.com", category: "business", authority: 8 },
+  { name: "OilPrice.com", feedUrl: "https://oilprice.com/rss/main", url: "https://oilprice.com", category: "business", authority: 8 },
   { name: "BBC Business", feedUrl: "https://feeds.bbci.co.uk/news/business/rss.xml", url: "https://www.bbc.com/news/business", category: "business", authority: 9 },
   { name: "CNBC Top", feedUrl: "https://www.cnbc.com/id/100003114/device/rss/rss.html", url: "https://www.cnbc.com", category: "business", authority: 9 },
 
