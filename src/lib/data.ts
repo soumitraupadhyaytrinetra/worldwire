@@ -75,9 +75,27 @@ export function getArticleBySlug(slug: number): Article | undefined {
 
 export function getTrendingArticles(limit: number = 4): Article[] {
   const articles = getAllArticles();
-  return articles
-    .sort((a, b) => (b.importanceScore || 0) - (a.importanceScore || 0))
-    .slice(0, limit);
+  const now = new Date();
+
+  // Score blends importance with recency and cross-source signal so the
+  // top-N actually rotates as new articles come in. Without the recency
+  // factor the hero boxes on the homepage stay frozen on whatever had the
+  // highest importanceScore on the day they were ingested.
+  const scored = articles.map((a) => {
+    const ageHours =
+      (now.getTime() - new Date(a.publicationDate).getTime()) / (1000 * 60 * 60);
+    const recencyFactor = Math.max(0, 1 - ageHours / 720); // linear decay over 30d
+    const crossSource =
+      (a.companies?.length || 0) + (a.technologies?.length || 0);
+    const finalScore =
+      (a.importanceScore || 0) * 0.3 + recencyFactor * 40 + crossSource * 3;
+    return { article: a, score: finalScore };
+  });
+
+  return scored
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((r) => r.article);
 }
 
 export function getTopStories(limit: number = 15): Article[] {
