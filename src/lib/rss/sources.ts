@@ -6,32 +6,33 @@ export interface RSSSource {
   authority: number;
 }
 
-// 30 working feeds (probed 2026-06-30). Failed candidates pruned:
-// - Reuters World, Reuters US, Reuters Business: reuters.com / reutersagency.com
-//   endpoints return 401/404 (authentication required)
-// - Politico: 403 bot block on all sub-feeds
-// - AP News: 401 / fetch failed (auth or moved)
-// - Wall Street Journal US/business: 403 (paywall / bot block)
-//   (WSJ World kept — that endpoint still works.)
-// - NPR Health: 404 (section deprecated); NPR Shots Health + Health Care work
-// - Scientific American: 404 (podcast feed gone; main feed also 404)
-// - USA Today: HTTP 406 (negotiation failure)
-// - Bloomberg Markets: paywalled article pages — crawl4ai always returned
-//   empty content, so every Bloomberg story showed up with no summary.
-//   Replaced 2026-06-30 with MarketWatch, Yahoo Finance, Investing.com,
-//   Business Insider Markets, and OilPrice.com — all scrapeable so each
-//   article gets a real TL;DR + body.
-// - Financial Times: same paywall problem as Bloomberg, removed.
+// 33 working feeds. Probed and pruned 2026-07-01:
+// - Removed NBC News: image CDN (media-cldnry.s-nbcnews.com) hotlink-blocks,
+//   leaving broken-image icons next to most NBC articles. Replaced with
+//   AP News (true global wire service) plus 5 sources that bring actual
+//   international diversity worldwire was missing (France 24, DW, ABC AU,
+//   The Diplomat, MIT Tech Review, Phys.org).
+// - Previously pruned (2026-06-30): Reuters (auth), Politico (403),
+//   AP News /index.rss (moved — now uses /apf-topnews + /apf-intlnews),
+//   WSJ US/business (paywall, WSJ World kept), NPR Health (404),
+//   Scientific American (404), USA Today (406), Bloomberg / FT (paywall
+//   content — replaced by MarketWatch / Yahoo Finance / Investing.com /
+//   Business Insider / OilPrice.com).
 export const defaultSources: RSSSource[] = [
   // World
   { name: "BBC World", feedUrl: "https://feeds.bbci.co.uk/news/world/rss.xml", url: "https://www.bbc.com/news/world", category: "world", authority: 10 },
+  { name: "AP News International", feedUrl: "https://apnews.com/apf-intlnews", url: "https://apnews.com", category: "world", authority: 9 },
   { name: "Guardian World", feedUrl: "https://www.theguardian.com/world/rss", url: "https://www.theguardian.com/world", category: "world", authority: 9 },
   { name: "Al Jazeera", feedUrl: "https://www.aljazeera.com/xml/rss/all.xml", url: "https://www.aljazeera.com", category: "world", authority: 9 },
   { name: "WSJ World", feedUrl: "https://feeds.a.dj.com/rss/RSSWorldNews.xml", url: "https://www.wsj.com/news/world", category: "world", authority: 9 },
+  { name: "France 24", feedUrl: "https://www.france24.com/en/rss", url: "https://www.france24.com/en", category: "world", authority: 8 },
+  { name: "Deutsche Welle", feedUrl: "https://rss.dw.com/xml/rss-en-all", url: "https://www.dw.com", category: "world", authority: 8 },
+  { name: "ABC Australia", feedUrl: "https://www.abc.net.au/news/feed/51120/rss.xml", url: "https://www.abc.net.au/news/world/", category: "world", authority: 7 },
+  { name: "The Diplomat", feedUrl: "https://thediplomat.com/feed/", url: "https://thediplomat.com", category: "world", authority: 7 },
 
   // US & Politics
   { name: "NPR Politics", feedUrl: "https://feeds.npr.org/1014/rss.xml", url: "https://www.npr.org/sections/politics/", category: "us", authority: 9 },
-  { name: "NBC News", feedUrl: "https://feeds.nbcnews.com/nbcnews/public/news", url: "https://www.nbcnews.com", category: "us", authority: 8 },
+  { name: "AP News Top", feedUrl: "https://apnews.com/apf-topnews", url: "https://apnews.com", category: "us", authority: 8 },
   { name: "CNN Top", feedUrl: "http://rss.cnn.com/rss/edition.rss", url: "https://www.cnn.com", category: "us", authority: 8 },
   { name: "CBS News", feedUrl: "https://www.cbsnews.com/latest/rss/main", url: "https://www.cbsnews.com", category: "us", authority: 8 },
 
@@ -53,9 +54,11 @@ export const defaultSources: RSSSource[] = [
   { name: "TechCrunch", feedUrl: "https://techcrunch.com/feed/", url: "https://techcrunch.com", category: "tech", authority: 9 },
   { name: "Ars Technica", feedUrl: "https://feeds.arstechnica.com/arstechnica/index", url: "https://arstechnica.com", category: "tech", authority: 9 },
   { name: "Wired", feedUrl: "https://www.wired.com/feed/rss", url: "https://www.wired.com", category: "tech", authority: 8 },
+  { name: "MIT Technology Review", feedUrl: "https://www.technologyreview.com/feed/", url: "https://www.technologyreview.com", category: "tech", authority: 8 },
 
   // Science & Health
   { name: "Science Daily", feedUrl: "https://www.sciencedaily.com/rss/all.xml", url: "https://www.sciencedaily.com", category: "science", authority: 8 },
+  { name: "Phys.org", feedUrl: "https://phys.org/rss-feed/", url: "https://phys.org", category: "science", authority: 7 },
   { name: "NPR Shots Health", feedUrl: "https://feeds.npr.org/1128/rss.xml", url: "https://www.npr.org/sections/health/", category: "science", authority: 9 },
   { name: "NPR Health Care", feedUrl: "https://feeds.npr.org/103537970/rss.xml", url: "https://www.npr.org/sections/health-care/", category: "science", authority: 9 },
   { name: "STAT News", feedUrl: "https://www.statnews.com/feed/", url: "https://www.statnews.com", category: "science", authority: 8 },
